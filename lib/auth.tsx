@@ -9,6 +9,7 @@ import type { ApiError } from "@/lib/api/client"
 
 export const DEMO_CREDENTIALS = {
   email: 'demo@example.com',
+  username: 'demo',
   password: '123456',
 }
 

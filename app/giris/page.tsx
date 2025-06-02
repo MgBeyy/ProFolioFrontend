@@ -28,8 +28,11 @@ export default function GirisPage() {
     setIsLoading(true)
 
     try {
-      await login({ email, password })
-      // If login is successful, user state will be updated in the context
+      await login({ username: email, password })
+      // Wait for user state to update
+      await new Promise(resolve => setTimeout(resolve, 1000)) // Give some time for user state to update
+      
+      // Check if we're logged in
       if (user) {
         router.push("/panel")
       } else {
@@ -65,7 +68,7 @@ export default function GirisPage() {
               Platformu test etmek için demo hesabını kullanabilirsiniz:
             </p>
             <div className="space-y-1 text-sm font-mono">
-              <div>E-posta: {DEMO_CREDENTIALS.email}</div>
+              <div>Kullanıcı Adı: {DEMO_CREDENTIALS.username}</div>
               <div>Şifre: {DEMO_CREDENTIALS.password}</div>
             </div>
             <Button
