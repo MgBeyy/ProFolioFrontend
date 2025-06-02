@@ -24,7 +24,7 @@ export default function OzgecmisPage() {
               </TabsTrigger>
               <TabsTrigger value="create" className="flex items-center gap-2">
                 <FileText className="h-4 w-4" />
-                <span>Özgeçmiş Oluştur</span>
+                <span>Özgeçmiş Oluştur / Düzenle</span>
               </TabsTrigger>
             </TabsList>
             <TabsContent value="upload" className="mt-6">
