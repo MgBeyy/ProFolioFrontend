@@ -29,17 +29,9 @@ export default function GirisPage() {
 
     try {
       await login({ username: email, password })
-      // Wait for user state to update
-      await new Promise(resolve => setTimeout(resolve, 1000)) // Give some time for user state to update
-      
-      // Check if we're logged in
-      if (user) {
-        router.push("/panel")
-      } else {
-        setError("Geçersiz e-posta veya şifre. Demo hesabı için: demo@profolio.com / demo123")
-      }
+      router.push("/panel") // login başarılıysa direkt yönlendir
     } catch (err) {
-      setError("Giriş yapılırken bir hata oluştu.")
+      setError("Geçersiz e-posta veya şifre.")
     } finally {
       setIsLoading(false)
     }
@@ -60,27 +52,7 @@ export default function GirisPage() {
           </p>
         </div>
 
-        {/* Demo Credentials Info */}
-        <Card className="bg-blue-50 border-blue-200 dark:bg-blue-950 dark:border-blue-800">
-          <CardContent className="p-4">
-            <h3 className="font-medium text-blue-800 dark:text-blue-200 mb-2">Demo Hesabı</h3>
-            <p className="text-sm text-blue-700 dark:text-blue-300 mb-3">
-              Platformu test etmek için demo hesabını kullanabilirsiniz:
-            </p>
-            <div className="space-y-1 text-sm font-mono">
-              <div>Kullanıcı Adı: {DEMO_CREDENTIALS.username}</div>
-              <div>Şifre: {DEMO_CREDENTIALS.password}</div>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={fillDemoCredentials}
-              className="mt-3 w-full border-blue-300 text-blue-700 hover:bg-blue-100 dark:border-blue-700 dark:text-blue-300"
-            >
-              Demo Bilgilerini Doldur
-            </Button>
-          </CardContent>
-        </Card>
+
 
         <Card>
           <CardHeader>

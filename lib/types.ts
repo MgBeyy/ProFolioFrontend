@@ -13,7 +13,7 @@ export interface User {
 
 // Authentication types
 export interface LoginCredentials {
-  email: string
+  username: string
   password: string
 }
 
