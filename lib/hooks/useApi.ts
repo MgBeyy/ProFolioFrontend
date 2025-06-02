@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ApiError } from "@/lib/api/client"
+import { ApiError } from "@/lib/types"
 
 interface UseApiState<T> {
   data: T | null
@@ -53,7 +53,7 @@ export function useApi<T>(apiCall: () => Promise<T>, options: UseApiOptions = {}
   }
 }
 
-export function useMutation<T, P = any>(apiCall: (params: P) => Promise<T>, options: UseApiOptions = {}) {
+export function useMutation<T, P = void>(apiCall: (params: P) => Promise<T>, options: UseApiOptions = {}) {
   const { onSuccess, onError } = options
 
   const [state, setState] = useState<UseApiState<T>>({
@@ -62,11 +62,11 @@ export function useMutation<T, P = any>(apiCall: (params: P) => Promise<T>, opti
     error: null,
   })
 
-  const mutate = async (params: P) => {
+  const mutate = async (params?: P) => {
     setState((prev) => ({ ...prev, loading: true, error: null }))
 
     try {
-      const data = await apiCall(params)
+      const data = await apiCall(params as P)
       setState({ data, loading: false, error: null })
       onSuccess?.(data)
       return data

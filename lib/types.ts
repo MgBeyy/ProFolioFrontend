@@ -138,7 +138,8 @@ export interface InterviewStartResponse {
   interview_id: number
   question_id: number
   question: string
-  message: string
+  skill?: string
+  message?: string
 }
 
 export interface NextQuestionRequest {
@@ -148,11 +149,14 @@ export interface NextQuestionRequest {
 }
 
 export interface NextQuestionResponse {
-  question_id: number
   question: string
+  correct_part?: string
+  wrong_part?: string
+  degree?: number
+  question_id?: number
   feedback?: string
   analysis?: string
-  message: string
+  message?: string
 }
 
 export interface FinishInterviewRequest {
@@ -241,11 +245,9 @@ export interface UserUpdateData {
 
 // API Response types
 export interface ApiResponse<T> {
-  data?: T
-  message?: string
-  detail?: string
-  error?: string
-  success?: boolean
+  result: string
+  message: string
+  data: T
 }
 
 export interface PaginatedResponse<T> {
@@ -258,9 +260,16 @@ export interface PaginatedResponse<T> {
   }
 }
 
-export interface ApiError {
-  message: string
+export class ApiError extends Error {
   detail?: string
   code?: string
   status?: number
+
+  constructor(message: string, code?: string, status?: number, detail?: string) {
+    super(message)
+    this.name = 'ApiError'
+    this.code = code
+    this.status = status
+    this.detail = detail
+  }
 }

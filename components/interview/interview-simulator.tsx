@@ -20,26 +20,46 @@ export default function InterviewSimulator() {
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [isInterviewFinished, setIsInterviewFinished] = useState(false)
   const [finalFeedback, setFinalFeedback] = useState<FinishInterviewResponse | null>(null)
+  const [questionCount, setQuestionCount] = useState(0)
 
   const { mutate: startInterview, loading: startingInterview } = useMutation(() => interviewApi.startInterview(), {
-    onSuccess: (data) => {
-      setInterviewData(data)
-      setCurrentQuestion(data.question)
-      setCurrentQuestionId(data.question_id)
-      setIsSubmitted(false)
-      setFeedback(null)
+    onSuccess: (response) => {
+      if (response.result === "success" && response.data) {
+        setInterviewData(response.data)
+        setCurrentQuestion(response.data.question)
+        setCurrentQuestionId(response.data.question_id)
+        setIsSubmitted(false)
+        setFeedback(null)
+        setQuestionCount(1)
+      }
     },
   })
 
   const { mutate: getNextQuestion, loading: gettingNextQuestion } = useMutation(
     (data: { interview_id: number; question_id: number; answer?: string }) => interviewApi.getNextQuestion(data),
     {
-      onSuccess: (data: NextQuestionResponse) => {
-        setCurrentQuestion(data.question)
-        setCurrentQuestionId(data.question_id)
-        setFeedback(data.feedback || null)
-        setAnswer("")
-        setIsSubmitted(false)
+      onSuccess: (response) => {
+        if (response.result === "success" && response.data) {
+          const data = response.data
+          if (data.question && typeof data.question === 'string') {
+            setCurrentQuestion(data.question)
+            setCurrentQuestionId(data.question_id || null)
+            if (data.feedback && typeof data.feedback === 'string') {
+              setFeedback(data.feedback)
+            } else if (data.correct_part || data.wrong_part) {
+              const feedbackParts = []
+              if (data.correct_part) feedbackParts.push(`Doğru Kısım: ${data.correct_part}`)
+              if (data.wrong_part) feedbackParts.push(`Geliştirilebilecek Kısım: ${data.wrong_part}`)
+              if (data.degree) feedbackParts.push(`Puan: ${data.degree}`)
+              setFeedback(feedbackParts.join('\n'))
+            }
+            setAnswer("")
+            setIsSubmitted(false)
+            setQuestionCount(prev => prev + 1)
+          } else {
+            handleFinishInterview()
+          }
+        }
       },
     },
   )
@@ -47,9 +67,11 @@ export default function InterviewSimulator() {
   const { mutate: finishInterview, loading: finishingInterview } = useMutation(
     (data: { interview_id: number; question_id: number; answer?: string }) => interviewApi.finishInterview(data),
     {
-      onSuccess: (data: FinishInterviewResponse) => {
-        setFinalFeedback(data)
-        setIsInterviewFinished(true)
+      onSuccess: (response) => {
+        if (response.result === "success" && response.data) {
+          setFinalFeedback(response.data)
+          setIsInterviewFinished(true)
+        }
       },
     },
   )
@@ -95,6 +117,7 @@ export default function InterviewSimulator() {
     setIsSubmitted(false)
     setIsInterviewFinished(false)
     setFinalFeedback(null)
+    setQuestionCount(0)
   }
 
   if (isInterviewFinished && finalFeedback) {
@@ -153,7 +176,7 @@ export default function InterviewSimulator() {
               className="bg-teal-600 hover:bg-teal-700 flex items-center gap-2"
             >
               {startingInterview ? <Loading size="sm" /> : <Play className="h-4 w-4" />}
-              Mülakatı Başlat
+              {startingInterview ? "Mülakat Başlatılıyor..." : "Mülakatı Başlat"}
             </Button>
           </CardContent>
         </Card>
@@ -165,7 +188,9 @@ export default function InterviewSimulator() {
     <div className="space-y-6">
       <Card className="bg-teal-50 border-teal-200">
         <CardContent className="p-6">
-          <h3 className="text-lg font-medium text-teal-800 mb-2">Soru:</h3>
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="text-lg font-medium text-teal-800">Soru {questionCount}:</h3>
+          </div>
           <p className="text-gray-700">{currentQuestion}</p>
         </CardContent>
       </Card>
@@ -187,6 +212,7 @@ export default function InterviewSimulator() {
             size="sm"
             onClick={toggleRecording}
             className={`flex items-center gap-1 ${isRecording ? "text-red-500" : ""}`}
+            disabled={gettingNextQuestion || finishingInterview}
           >
             {isRecording ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
             {isRecording ? "Kaydı Durdur" : "Sesli Yanıtla"}
